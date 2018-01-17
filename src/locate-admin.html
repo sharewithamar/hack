@@ -1,0 +1,168 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid-selection-column.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid-sorter.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/geo-location/geo-location.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="locate-admin">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      .close-modal{
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        background: #fff;
+        padding: 0px;
+        border-radius: 50%;
+      }
+      paper-dialog{
+        padding:15px 5px;
+        z-index: 999;
+      }
+      paper-dialog-scrollable{
+        padding: 10px 15px;
+      }
+      .response{
+        font-weight:bold;
+      }
+      google-map{
+        min-height:300px;
+      }
+      
+    </style>
+
+    <div class="card">
+      <h1>List Of Offers So Far...</h1>
+      <iron-ajax auto url="http://10.117.189.145:8080/offers" id="fetchData" handle-as="json" on-response="handleResponse"></iron-ajax>
+      <vaadin-grid items="[[dataObj]]" column-reordering-allowed multi-sort>
+        <vaadin-grid-column width="5em" resizable>
+          <template class="header">
+            <vaadin-grid-sorter path="customerId">Customer ID</vaadin-grid-sorter>
+          </template>
+          <template>
+            <span on-tap="pushdata">[[item.customerId]]</span>
+          </template>
+        </vaadin-grid-column>
+
+        <vaadin-grid-column width="5em" resizable>
+          <template class="header">
+            <vaadin-grid-sorter path="placeAddress">Address</vaadin-grid-sorter>
+          </template>
+          <template>[[item.placeAddress]]</template>
+        </vaadin-grid-column>
+
+        <vaadin-grid-column width="1em">
+            <template class="header">
+              <vaadin-grid-sorter path="PlaceAddress">View</vaadin-grid-sorter>
+            </template>
+            <template>
+              <paper-icon-button icon="visibility" on-tap="showPanel">View Details</paper-icon-button>
+            </template>
+          </vaadin-grid-column>
+  
+      </vaadin-grid>
+      <paper-dialog id="showoffer">
+          <div class="close-modal">
+            <paper-icon-button dialog-dismiss icon="close">close</paper-icon-button>
+          </div>
+          <h2>Viewing Offer Details</h2>
+          <paper-dialog-scrollable>
+            <table width="90%" bordercolor="#cccccc" align="center" cellpadding="10" cellspacing="0" border="0">
+              <tbody>
+                <tr>
+                  <td>Customer ID</td>
+                  <td>:</td>
+                  <td class="response">{{showObj.customerId}}</td>
+                </tr>
+                <tr>
+                  <td>Valid Date</td>
+                  <td>:</td>
+                  <td class="response">{{showObj.OfferDate}}</td>
+                </tr>
+                <tr>
+                  <td>Valid Till</td>
+                  <td>:</td>
+                  <td class="response">{{showObj.OfferTime}}</td>
+                </tr>
+                <tr>
+                  <td>Starbucks Address</td>
+                  <td>:</td>
+                  <td class="response">{{showObj.placeAddress}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <geo-location watch-pos high-accuracy latitude="{{showObj.latitude}}" longitude="{{showObj.longitude}}"></geo-location>
+            <!-- TODO: change the API key to your own. -->
+            <google-map latitude="{{showObj.latitude}}" longitude="{{showObj.longitude}}" api-key="AIzaSyDHtOP7Ny_WMxLH5WM_yiiTiB37Hion55g">
+              <google-map-marker slot="markers" latitude="{{showObj.latitude}}" longitude="{{showObj.longitude}}"></google-map-marker>
+            </google-map>
+          </paper-dialog-scrollable>
+        </paper-dialog>
+    </div>
+  </template>
+
+  <script>
+    class LocateAdmin extends Polymer.Element {
+      static get is() { return 'locate-admin'; }
+      static get properties(){
+        return{
+          dataObj:{
+            type:Object,
+            value:{
+            }
+          },
+          showObj:{
+            type:Object,
+            value:{
+
+            }
+          },
+          days:{
+            type:Array,
+            value:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+          },
+          months:{
+            type:Array,
+            value:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+          }
+        }
+      }
+      handleResponse(e){
+        this.dataObj = e.detail.__data.response.offers;
+      }
+      showPanel(e){
+        var st = new Date(e.model.item.timePlaced);
+        var et = new Date(e.model.item.timePlaced);
+        et.setHours( st.getHours() + 1);
+        console.log(et);
+        e.model.item.OfferDate = this.days[st.getDay()] + ', ' + this.months[st.getMonth()] + ' ' + st.getDate();
+        e.model.item.OfferTime = et.getHours() + ":" + et.getMinutes() + ":" + et.getSeconds();
+        this.showObj = e.model.item;
+        this.$.showoffer.open();
+      }
+    }
+
+    window.customElements.define(LocateAdmin.is, LocateAdmin);
+  </script>
+</dom-module>

@@ -1,0 +1,327 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+btn btn--white btn--animated
+-->
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+
+<dom-module id="locate-user">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      /* #2ecc71*/
+      app-header-layout,app-header{
+        background-color: transparent;
+      }
+
+      #toast {
+        --paper-toast-background-color: #2ecc71;
+        --paper-toast-color: white;
+
+      }
+
+      #toast1 {
+        --paper-toast-background-color: #e74c3c;
+        --paper-toast-color: white;
+
+      }
+
+      header {
+        @apply --layout-vertical;
+        @apply --layout-center-center;
+        padding: 0 16px;
+        background-image: url(../images/bucks2.jpg);
+        background-repeat: no-repeat;
+        background-size: cover;
+        color: white;
+        /*text-align: center;*/
+        height: 100vh;
+        display: flex;
+        justify-content: center
+      }
+
+      header>h2 {
+        font-size: 56px;
+        font-weight: 300;
+        margin: 0;
+        text-shadow: 4px 4px 2px rgba(150, 150, 150, 1);
+
+      }
+
+      paper-card {
+        min-width: 400px;
+        align-self: center;
+        box-shadow: 0 5rem 2rem rgba(#000, 0.1);
+        padding: 10px;
+
+
+      }
+
+      .card-content {
+        display: grid;
+        flex-direction: column;
+        align-items: flex-start;
+
+      }
+
+      .btn,
+      .btn:link,
+      .btn:visited {
+        text-transform: uppercase;
+        text-decoration: none;
+        padding: 1rem 4rem;
+        display: inline-block;
+        border-radius: 10rem;
+        transition: all .2s;
+        position: relative;
+        font-size: 1.3rem;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn:hover {
+        transform: translateY(-0.3rem);
+        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+      }
+
+      .btn:hover::after {
+        transform: scaleX(1.4) scaleY(1.6);
+        opacity: 0;
+      }
+
+      .btn:active,
+      .btn:focus {
+        outline: none;
+        transform: translateY(-0.1rem);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+      }
+
+      .btn--white {
+        background-color: #ffffff;
+        color: #777;
+      }
+
+      .btn--white::after {
+        background-color: #ffffff;
+      }
+
+      .btn--green {
+        background-color: #55c57a;
+        color: #ffffff;
+      }
+
+      .btn--green::after {
+        background-color: #55c57a;
+      }
+
+      .btn::after {
+        content: "";
+        display: inline-block;
+        height: 100%;
+        width: 100%;
+        border-radius: 10rem;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        transition: all 0.4s;
+      }
+
+      .btn--animated {
+        animation: moveInBottom 0.5s ease-out 0.75s;
+        animation-fill-mode: backwards;
+      }
+
+      @keyframes moveInBottom {
+        0% {
+          opacity: 0;
+          transform: translateY(3rem);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+          
+        }
+      }
+
+      .btn-text:link,
+      .btn-text:visited {
+        font-size: 1.6rem;
+        color: #55c57a;
+        display: inline-block;
+        text-decoration: none;
+        border-bottom: 1px solid #55c57a;
+        padding: 3px;
+        transition: all .2s;
+      }
+
+      .btn-text:hover {
+        background-color: #55c57a;
+        color: #fff;
+        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+      }
+
+      .btn-text:active {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transform: translateY(0);
+      }
+      #navBtn{
+        position: absolute;
+        top: 10px;
+        right:10px; 
+      }
+
+     paper-card{
+      box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.15);
+      border-radius: 3px;
+     } 
+
+    </style>
+    <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
+    </app-location>
+    <paper-toast id="toast"  role="alert" duration="15000" text="API handshake is succesful"></paper-toast>
+    <paper-toast id="toast1" role="alert" duration="15000"text="API handshake is Failed"></paper-toast>
+
+    <app-header-layout>
+
+      <header  role="banner">
+          <!-- <a href="#" on-click="Navigate" class="btn-text">Amar &rarr;</a> -->
+          <a id="navBtn" role="button" class="btn-text" href="[[rootPath]]admin">Admin &rarr;</a>
+
+
+        <h2>Connecting With Nearby Beacon</h2>
+        <paper-card>
+          <iron-form role="postform" id="offerform">
+
+            <form>
+              <div class="card-content">
+                <paper-input id="cif" always-float-label label="Customer ID" allowed-pattern="^[0-9]+$" name="cif" required auto-validate error-message="Enter Customer Id!"
+                  label="Customer ID" value="{{locateform.user.cif}}"></paper-input>
+                <paper-input id="deviceId" always-float-label label="Device ID" name="deviceId" required auto-validate error-message="Enter Device Id!"
+                  label="Device ID" value="{{locateform.user.deviceId}}"></paper-input>
+                <paper-input id="geoFencId" always-float-label label="Geofence ID" name="geoFencId" required auto-validate error-message="Enter Geofence Id!"
+                  label="Latitude" value="{{locateform.user.geoFencId}}"></paper-input>
+                <paper-input id="latitude" always-float-label label="Latitude" pattern="^[1-9]\d*(\.\d+)?$" name="latitude" required auto-validate
+                  error-message="Enter Valid Latitude!" label="Latitude" value="{{locateform.user.latitude}}"></paper-input>
+                <paper-input id="longitude" pattern="^[1-9]\d*(\.\d+)?$" always-float-label label="Longitude" name="longitude" required auto-validate
+                  error-message="Enter Valid Longitude!" label="Latitude" value="{{locateform.user.longitude}}"></paper-input>
+
+                <!--       
+          <paper-input always-float-label label="Sell Amount" pattern="^[1-9]\d*(\.\d+)?$"
+          
+           required auto-validate error-message="Enter only numbers!"value="{{locateform.toSell}}"></paper-input> -->
+
+              </div>
+              <div class="card-actions" style="text-align:center">
+                <paper-button  role="button" class="btn btn--green btn--animated" on-click="submit" type="submit" style="color:black">Connect</paper-button>
+              </div>
+            </form>
+          </iron-form>
+          <iron-ajax id="postUser" method="POST" body='{{locateform}}' handle-as="json" content-type="application/json" on-response="serverSuccessCb"
+            on-error="serverErrorCb" url="http://10.117.189.145:8080/locateme">
+          </iron-ajax>
+
+
+        </paper-card>
+      </header>
+
+    </app-header-layout>
+  </template>
+
+  <script>
+    class LocateUser extends Polymer.Element {
+      static get is() { return 'locate-user'; }
+      static get properties() {
+        return {
+          locateform: {
+            type: Object,
+            value: {
+              user: {
+
+              }
+            }
+          }
+
+
+        };
+      }
+      submit() {
+
+        var d = new Date();
+        // var dt = d.getFullYear() + "-" + ('0' + (d.getMonth() + 1)).slice(-2) + "-" + ('0' + d.getDate()).slice(-2) + "T" + ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2) + ":" + ('0' + d.getSeconds()).slice(-2) + ":" + d.getMilliseconds() + 'Z';
+        // console.log(dt);
+        this.locateform.user.timePlaced = d.toJSON();
+        this.locateform.user.cif = parseInt(this.locateform.user.cif);
+        this.locateform.user.deviceId = parseInt(this.locateform.user.deviceId);
+        this.locateform.user.geoFencId = parseInt(this.locateform.user.geoFencId);
+        this.locateform.user.latitude = parseFloat(this.locateform.user.latitude);
+        this.locateform.user.longitude = parseFloat(this.locateform.user.longitude);
+
+        // console.log("form values",JSON.stringify(this.currencyform));
+        if (this.$.offerform.validate()) {
+          // this.$.toast.text = "API handshake is successful,Enjoy Exciting offers !";
+          // this.$.toast.show();
+          console.log("valid");
+          console.log("form values", JSON.stringify(this.locateform));
+
+         this.$.postUser.generateRequest();
+        }
+
+      }
+      serverSuccessCb(response) {
+        console.log("Search successful", response);
+        //response.detail.__data.response
+        if (response.detail.__data.response.statusCode == "Success") {
+          console.log(response.detail.__data.response);
+          var date = new Date();
+          date.toString("MMM dd"); 
+          this.$.toast.text = "API handshake is completed successful at "+ date;
+          this.$.toast.show();
+
+        //  this.set('route.path', 'admin');
+        }
+        else {
+          this.$.toast1.text = "API handshake failed,Server Down ! Please try again later";
+          this.$.toast1.show();
+        }
+      }
+      serverErrorCb(error) {
+        this.$.toast1.text = "API handshake failed,Server Down ! Please try again later";
+        this.$.toast1.show();
+      }
+      Navigate()
+      {
+        this.set('route.path', 'admin');
+
+      }
+    }
+
+    window.customElements.define(LocateUser.is, LocateUser);
+  </script>
+</dom-module>
